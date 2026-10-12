@@ -117,3 +117,32 @@ with open("sinnes_2014_2025_med_makstemperatur.csv", "r", encoding="utf-8", newl
                 periode = 0
         else:
             periode = 0
+
+print(f"Antall dager med skiføre: {dager_skiføre}")
+print(f"Antall growing degree days: {round(plante_vekst, 2)}")
+print(
+    f"Lengste periode uten nedbør er: {lengste_periode} dager!, startdato er: {startdato_uten_nedbør} og sluttdato er: {sluttdato_uten_nedbør}")
+print(
+    f"Antall sommerdager i {år} er: {sommer_dager}! Antall høysommerdager i {år} er: {høy_sommer_dager}! og antall tropenetter i {år} er: {trope_dager}!")
+
+fig, ax = plt.subplots(5, 1, figsize=(12, 8), sharex=True)
+ax[0].plot(datoer, makstemperatur)
+ax[1].plot(datoer, middeltemperatur)
+ax[2].plot(datoer, nedbør)
+ax[3].plot(datoer, høyeste_middelvind)
+ax[4].plot(datoer, snødybde)
+
+ax[0].set_ylabel("°C")
+ax[1].set_ylabel("°C")
+ax[2].set_ylabel("mm")
+ax[3].set_ylabel("m/s")
+ax[4].set_ylabel("cm")
+
+ax[0].set_title("Makstemperatur")
+ax[1].set_title("Middeltemperatur")
+ax[2].set_title("Nedbør")
+ax[3].set_title("Høyeste middelvind")
+ax[4].set_title("Snødybde")
+
+plt.tight_layout()
+plt.show()
