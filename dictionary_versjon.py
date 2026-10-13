@@ -3,8 +3,9 @@ import sys
 import csv
 from datetime import datetime
 
-FILSTI = "Obligatoriske Innleveringer/Oblig7/sinnes_2014_2025_med_makstemperatur.csv"
+FILSTI = "sinnes_2014_2025_med_makstemperatur.csv"
 
+#Tillater at strenger som "-" behandles som "nan", som kan brukes som et tall, i motsetning til None.
 def tall(x):
     try:
         tallet = float(x.replace(",", ".").strip())
@@ -13,7 +14,7 @@ def tall(x):
         tallet = float("nan")
         return tallet
 
-
+#Enkel funksjon for å forsikre oss om at årstallet brukeren skriver inn er fire siffer
 def skriv_inn_årstall():
     while True:
         årstall = input("Skriv inn årstall:").strip()
@@ -41,7 +42,7 @@ with fil:
             datetime.strptime(dato, "%d.%m.%Y")
         except (ValueError, TypeError):
             continue
-
+        
         navn = rad.get("Navn")
         max_temp = rad.get("Maksimumstemperatur (døgn)")
         mid_temp = rad.get("Middeltemperatur (døgn)")
@@ -51,37 +52,45 @@ with fil:
 
         bibliotek[dato] = navn, max_temp, mid_temp, nedbør, mid_vind, snødybde
 
+#Biblioteket sorteres etter år, måned og dag. Dette gjøres for å sikre at dataene er i kronologisk rekkefølge.
 bibliotek = dict(sorted(bibliotek.items(), key=lambda par: (par[0][-4:], par[0][3:5], par[0][0:2])))
 
-
+#Bruker funksjonen skriv_inn_årstall() til å få et gyldig årstall fra brukeren
 år = int(skriv_inn_årstall())
 
+#Start og slutt dato for snødybdeperiode og antall snødager
 startdato_snø = datetime.strptime(f"01.11.{år-1}", "%d.%m.%Y")
 sluttdato_snø = datetime.strptime(f"01.05.{år}", "%d.%m.%Y")
 antall_snødager = 0
 
+#Variabler for beregning av plantevekst. float("-inf") brukes i tilfelle det kun er negativ plantevekst
 curr_sum_plante = 0
 max_sum_plante = float("-inf")
 
+#Variabler for beregning av periode uten regn
 periode_regn = 0
 lengste_periode_regn = 0
 startdato_regn_rekord = sluttdato_regn_rekord = 0
 startdato_periode_regn = 0
 
+#Variabler for sommerdager, høysommerdager og tropedager
 sommerdager = 0
 høysommerdager = 0
 tropedager = 0
 
+#Lister for plotting
 x_datoer = []
 snødybde_liste = []
 nedbør_liste = []
 mid_temp_liste = []
 mid_vind_liste = []
 
+#Looper gjennom det sorterte biblioteket og utfører beregninger for hvert år
 for dato, verdier in bibliotek.items():
     dato_obj = datetime.strptime(dato, "%d.%m.%Y")
     i_året = dato_obj.year == år
 
+    #Diverse verdier for denne iterasjonensettes til egne variabler
     max_temp = tall(verdier[1])
     mid_temp = tall(verdier[2])
     nedbør = tall(verdier[3])
@@ -105,10 +114,11 @@ for dato, verdier in bibliotek.items():
             sluttdato_regn_rekord = dato       
     else:
         periode_regn = 0
-    
+
+    #Alt inni her skjer kun hvis årstallet til datoen i csv-filen er likt som årstallet brukeren skrev inn
     if i_året:
 
-        # Plantevekst beregnes (Finner beste periode med høyest sum av plantevekst, ubestemt start og slutt)
+        # Plantevekst beregnes (Finner beste start OG sluttdato til perioden med høyest sum av plantevekst).
         # (Kadanes algoritme)
         if mid_temp > 5:
             plante_verdi = mid_temp - 5
@@ -144,6 +154,7 @@ for dato, verdier in bibliotek.items():
         mid_temp_liste.append(mid_temp)
         mid_vind_liste.append(mid_vind)
 
+#Avslutter programmet hvis x_datoer er tom.
 if not x_datoer:
     print("Ingen data tilgjengelig for dette året.")
     sys.exit(2)
