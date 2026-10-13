@@ -25,6 +25,7 @@ def skriv_inn_årstall():
             print("Årstallet må ha 4 siffer")
 
 
+#Prøver å åpne filen. Avslutter programmet med feilmelding hvis filen ikke finnes
 try:
     fil = open(FILSTI, encoding="utf-8-sig", newline="")
 except FileNotFoundError:
@@ -33,6 +34,7 @@ except FileNotFoundError:
 
 bibliotek = {}
 
+#Leser filen med Dictreader og lager bibliotek med dato knyttet opp til liste av verdier
 with fil:
     leser = csv.DictReader(fil, delimiter=";")
 
